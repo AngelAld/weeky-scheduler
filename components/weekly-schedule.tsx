@@ -2,14 +2,22 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDeviceSizes } from "@/lib/media-queries";
 import type { Activity } from "@/lib/types";
 import { Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface WeeklyScheduleProps {
   activities: Activity[];
@@ -58,6 +66,8 @@ const dayMap: Record<string, { full: string; short: string }> = {
 };
 
 export function WeeklySchedule({ activities, onRemove }: WeeklyScheduleProps) {
+  const { isMobile } = useDeviceSizes();
+  const [isClient, setIsClient] = useState(false);
   // Group activities by day
   const activitiesByDay = useMemo(() => {
     const grouped: Record<string, Activity[]> = {
@@ -86,6 +96,23 @@ export function WeeklySchedule({ activities, onRemove }: WeeklyScheduleProps) {
       labels.push(`${hour}:00`);
     }
     return labels;
+  }, []);
+
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Function to handle activity click
+  const handleActivityClick = (activity: Activity, isMobile: boolean) => {
+    if (isMobile) {
+      setSelectedActivity(activity);
+      setIsDialogOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    setIsClient(true);
   }, []);
 
   return (
@@ -126,67 +153,136 @@ export function WeeklySchedule({ activities, onRemove }: WeeklyScheduleProps) {
           </div>
 
           {/* Day columns */}
-          {Object.keys(activitiesByDay).map((day) => (
-            <div key={day} className="relative bg-muted/30 rounded-md">
-              {/* Horizontal time guide lines */}
-              {timeLabels.map((_, index) => (
-                <div
-                  key={index}
-                  className="absolute w-full border-t border-muted-foreground/20"
-                  style={{ top: `${(index / (timeLabels.length - 1)) * 100}%` }}
-                />
-              ))}
+          {isClient && (
+            <>
+              {Object.keys(activitiesByDay).map((day) => (
+                <div key={day} className="relative bg-muted/30 rounded-md">
+                  {/* Horizontal time guide lines */}
+                  {timeLabels.map((_, index) => (
+                    <div
+                      key={index}
+                      className="absolute w-full border-t border-muted-foreground/20"
+                      style={{
+                        top: `${(index / (timeLabels.length - 1)) * 100}%`,
+                      }}
+                    />
+                  ))}
 
-              {/* Activities */}
-              <TooltipProvider>
-                {activitiesByDay[day].map((activity) => (
-                  <Tooltip key={activity.id}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="absolute w-[95%] left-[2.5%] rounded-md p-2 overflow-hidden text-xs font-medium text-white flex flex-col"
-                        style={{
-                          top: minutesToPosition(
-                            timeToMinutes(activity.startTime)
-                          ),
-                          height: calculateHeight(
-                            activity.startTime,
-                            activity.endTime
-                          ),
-                          backgroundColor: activity.color,
-                        }}
+                  {/* Activities */}
+                  {activitiesByDay[day].map((activity) => {
+                    return isMobile ? (
+                      <Dialog
+                        key={activity.id}
+                        open={
+                          isDialogOpen && selectedActivity?.id === activity.id
+                        }
+                        onOpenChange={setIsDialogOpen}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="font-bold truncate">
-                            {activity.title}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 text-white hover:bg-white/20 -mt-1 -mr-1"
-                            onClick={() => onRemove(activity.id)}
+                        <DialogTrigger asChild>
+                          <div
+                            className="absolute w-[95%] left-[2.5%] rounded-md p-2 overflow-hidden text-xs font-medium text-white flex flex-col"
+                            style={{
+                              top: minutesToPosition(
+                                timeToMinutes(activity.startTime)
+                              ),
+                              height: calculateHeight(
+                                activity.startTime,
+                                activity.endTime
+                              ),
+                              backgroundColor: activity.color,
+                            }}
+                            onClick={() => handleActivityClick(activity, true)}
                           >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <div className="mt-1 opacity-90">
-                          {activity.startTime} - {activity.endTime}
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="space-y-1">
-                        <p className="font-bold">{activity.title}</p>
-                        {activity.description && <p>{activity.description}</p>}
-                        <p>
-                          Horario: {activity.startTime} - {activity.endTime}
-                        </p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </TooltipProvider>
-            </div>
-          ))}
+                            <div className="font-bold truncate">
+                              {activity.title}
+                            </div>
+                            <div className="mt-1 opacity-90">
+                              {activity.startTime} - {activity.endTime}
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>{activity.title}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-3 py-4">
+                            {activity.description && (
+                              <p>{activity.description}</p>
+                            )}
+                            <p>
+                              Horario: {activity.startTime} - {activity.endTime}
+                            </p>
+                            <div className="pt-2">
+                              <Button
+                                variant="destructive"
+                                onClick={() => {
+                                  onRemove(activity.id);
+                                  setIsDialogOpen(false);
+                                }}
+                                className="w-full"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar actividad
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      <TooltipProvider key={activity.id}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="absolute w-[95%] left-[2.5%] rounded-md p-2 overflow-hidden text-xs font-medium text-white flex flex-col"
+                              style={{
+                                top: minutesToPosition(
+                                  timeToMinutes(activity.startTime)
+                                ),
+                                height: calculateHeight(
+                                  activity.startTime,
+                                  activity.endTime
+                                ),
+                                backgroundColor: activity.color,
+                              }}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="font-bold truncate">
+                                  {activity.title}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5 text-white hover:bg-white/20 -mt-1 -mr-1"
+                                  onClick={() => onRemove(activity.id)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <div className="mt-1 opacity-90">
+                                {activity.startTime} - {activity.endTime}
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="space-y-1">
+                              <p className="font-bold">{activity.title}</p>
+                              {activity.description && (
+                                <p>{activity.description}</p>
+                              )}
+                              <p>
+                                Horario: {activity.startTime} -{" "}
+                                {activity.endTime}
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  })}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
