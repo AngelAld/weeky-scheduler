@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Toaster } from "@/components/ui/sonner";
 import { WeeklySchedule } from "@/components/weekly-schedule";
 import type { Activity } from "@/lib/types";
 import { Plus } from "lucide-react";
@@ -42,7 +41,9 @@ export function SchedulePlanner() {
   return (
     <div className="container mx-auto max-w-7xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Planificador de Horarios</h1>
+        <h1 className="text-xl sm:text-3xl font-semibold sm:font-bold">
+          Planificador de Horarios
+        </h1>
         <div className="flex items-center gap-2">
           <ExportOptions activities={activities} />
           <ThemeToggle />
@@ -53,7 +54,7 @@ export function SchedulePlanner() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Mi Horario Semanal</CardTitle>
-            <CardDescription>
+            <CardDescription className="hidden sm:block">
               Visualiza y gestiona tus actividades semanales.
             </CardDescription>
           </div>
@@ -73,8 +74,6 @@ export function SchedulePlanner() {
         onAddActivities={addActivities}
         existingActivities={activities}
       />
-
-      <Toaster />
     </div>
   );
 }

@@ -173,7 +173,7 @@ export function ActivityDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <DialogContent className="sm:max-w-[500px] overflow-y-auto max-h-[90vh]">
+          <DialogContent className="overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Agregar Nueva Actividad</DialogTitle>
               <DialogDescription>
@@ -218,7 +218,7 @@ export function ActivityDialog({
             {form.watch("days").map((_, index) => (
               <div
                 key={index}
-                className="grid grid-cols-1 gap-6 md:grid-cols-3 items-end border rounded-xl p-4"
+                className="grid md:grid-cols-10 gap-3 p-3 rounded-lg bg-muted/40 border items-end"
               >
                 <FormField
                   control={form.control}
@@ -252,10 +252,10 @@ export function ActivityDialog({
                   control={form.control}
                   name={`startTimes.${index}`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-3">
                       <FormLabel>Hora de inicio</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" {...field} className="" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -266,10 +266,10 @@ export function ActivityDialog({
                   control={form.control}
                   name={`endTimes.${index}`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-3">
                       <FormLabel>Hora de finalización</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" {...field} className="" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -278,28 +278,9 @@ export function ActivityDialog({
 
                 <Button
                   type="button"
-                  className="cursor-pointer md:hidden"
+                  className="cursor-pointer w-full sm:w-auto col-span-3 md:col-span-1"
                   variant="destructive"
-                  onClick={() => {
-                    const days = form.getValues("days");
-                    const startTimes = form.getValues("startTimes");
-                    const endTimes = form.getValues("endTimes");
-                    days.splice(index, 1);
-                    startTimes.splice(index, 1);
-                    endTimes.splice(index, 1);
-                    form.setValue("days", days);
-                    form.setValue("startTimes", startTimes);
-                    form.setValue("endTimes", endTimes);
-                  }}
-                >
-                  <Trash2 size={24} /> Eliminar día
-                </Button>
-
-                <Button
-                  type="button"
-                  className="cursor-pointer hidden md:inline-flex"
                   size="icon"
-                  variant="destructive"
                   onClick={() => {
                     const days = form.getValues("days");
                     const startTimes = form.getValues("startTimes");
@@ -312,7 +293,8 @@ export function ActivityDialog({
                     form.setValue("endTimes", endTimes);
                   }}
                 >
-                  <Trash2 size={24} />
+                  <Trash2 size={24} />{" "}
+                  <span className="inline-block md:hidden">Eliminar Día</span>
                 </Button>
               </div>
             ))}
