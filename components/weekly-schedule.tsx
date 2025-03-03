@@ -135,7 +135,7 @@ export function WeeklySchedule({ activities, onRemove }: WeeklyScheduleProps) {
         </div>
 
         {/* Schedule grid */}
-        <div className="grid grid-cols-8 gap-1 relative min-h-[60dvh]">
+        <div className="grid grid-cols-8 gap-1 relative h-[63dvh]">
           {/* Time column */}
           <div className="relative">
             {timeLabels.map((time, index) => (
@@ -156,7 +156,7 @@ export function WeeklySchedule({ activities, onRemove }: WeeklyScheduleProps) {
           {isClient && (
             <>
               {Object.keys(activitiesByDay).map((day) => (
-                <div key={day} className="relative bg-muted/30 rounded-md">
+                <div key={day} className="relative bg-muted/30">
                   {/* Horizontal time guide lines */}
                   {timeLabels.map((_, index) => (
                     <div

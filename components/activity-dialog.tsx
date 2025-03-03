@@ -68,12 +68,32 @@ const formSchema = z.object({
     .min(1, {
       message: "Selecciona al menos un día.",
     }),
-  startTimes: z.array(z.string()).min(1, {
-    message: "Por favor selecciona una hora de inicio.",
-  }),
-  endTimes: z.array(z.string()).min(1, {
-    message: "Por favor selecciona una hora de finalización.",
-  }),
+  startTimes: z
+    .array(z.string())
+    .min(1, {
+      message: "Por favor selecciona una hora de inicio.",
+    })
+    .refine(
+      (startTimes) => {
+        return startTimes.every((time) => time !== "");
+      },
+      {
+        message: "Por favor selecciona una hora de inicio.",
+      }
+    ),
+  endTimes: z
+    .array(z.string())
+    .min(1, {
+      message: "Por favor selecciona una hora de finalización.",
+    })
+    .refine(
+      (endTimes) => {
+        return endTimes.every((time) => time !== "");
+      },
+      {
+        message: "Por favor selecciona una hora de finalización",
+      }
+    ),
   color: z.string().default("#4f46e5"),
 });
 
@@ -215,7 +235,9 @@ export function ActivityDialog({
                 )}
               />
             </div>
+
             <FormLabel>Días y Horarios</FormLabel>
+
             {form.watch("days").map((_, index) => (
               <div
                 key={index}
@@ -230,6 +252,7 @@ export function ActivityDialog({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -256,7 +279,12 @@ export function ActivityDialog({
                     <FormItem className="col-span-3">
                       <FormLabel>Hora de inicio</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} className="" />
+                        <Input
+                          type="time"
+                          {...field}
+                          className=""
+                          value={field.value}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -270,7 +298,12 @@ export function ActivityDialog({
                     <FormItem className="col-span-3">
                       <FormLabel>Hora de finalización</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} className="" />
+                        <Input
+                          type="time"
+                          {...field}
+                          className=""
+                          value={field.value}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -282,6 +315,7 @@ export function ActivityDialog({
                   className="cursor-pointer w-full sm:w-auto col-span-3 md:col-span-1"
                   variant="destructive"
                   size="icon"
+                  disabled={form.getValues("days").length <= 1}
                   onClick={() => {
                     const days = form.getValues("days");
                     const startTimes = form.getValues("startTimes");
@@ -289,6 +323,7 @@ export function ActivityDialog({
                     days.splice(index, 1);
                     startTimes.splice(index, 1);
                     endTimes.splice(index, 1);
+
                     form.setValue("days", days);
                     form.setValue("startTimes", startTimes);
                     form.setValue("endTimes", endTimes);
