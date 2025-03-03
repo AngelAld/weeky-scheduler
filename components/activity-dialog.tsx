@@ -101,8 +101,6 @@ export function ActivityDialog({
       color: "#4f46e5",
     },
   });
-  console.log("Form values: ", form.watch());
-  console.log("Form errors: ", form.formState.errors);
 
   // Asegurarse de que haya al menos un día para mostrar los campos
   React.useEffect(() => {
@@ -114,7 +112,6 @@ export function ActivityDialog({
   }, [form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form sended: ", values);
     const { startTimes, endTimes, days } = values;
 
     // Validate that end time is after start time
@@ -171,9 +168,9 @@ export function ActivityDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <DialogContent className="overflow-y-auto max-h-[90vh]">
+      <DialogContent className="overflow-y-auto max-h-[90vh]">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <DialogHeader>
               <DialogTitle>Agregar Nueva Actividad</DialogTitle>
               <DialogDescription>
@@ -195,7 +192,9 @@ export function ActivityDialog({
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <div className="h-6">
+                      <FormMessage />
+                    </div>
                   </FormItem>
                 )}
               />
@@ -209,7 +208,9 @@ export function ActivityDialog({
                     <FormControl>
                       <Input placeholder="Ej: Sala 201" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <div className="h-6">
+                      <FormMessage />
+                    </div>
                   </FormItem>
                 )}
               />
@@ -354,13 +355,11 @@ export function ActivityDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" onClick={() => onSubmit(form.getValues())}>
-                Agregar Actividad
-              </Button>
+              <Button type="submit">Agregar Actividad</Button>
             </DialogFooter>
-          </DialogContent>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }
